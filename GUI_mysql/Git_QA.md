@@ -210,3 +210,130 @@ git stash pop       # 가장 최근 stash 복원
 
 ```
 
+---
+
+```markdown
+# Git SSH 및 파일 이름 변경 관련 오류 정리 (QA)
+
+---
+
+## ❓ Q1: `git push` 했더니 이런 오류가 났어요.
+
+```
+
+[git@github.com](mailto:git@github.com)\:Xellos216/SQL.Study.git does not appear to be a git repository
+fatal: Could not read from remote repository.
+
+```
+
+### ✅ A1: 원인은 **레포지토리 주소 오타**예요.
+
+- `SQL.Study.git`처럼 **`.`(dot)** 을 사용했는데,
+- 실제로 만든 레포는 `SQL_Study.git` (**언더바 `_`**)였어요.
+- GitHub은 `.`, `_`, `-`를 **완전히 다른 문자**로 취급해요.
+  → 이름이 정확히 일치해야만 동작함.
+
+---
+
+## ❓ Q2: 그럼 이 오류는 왜 생기는 거예요?
+
+```
+
+fatal: Could not read from remote repository.
+Please make sure you have the correct access rights and the repository exists.
+
+````
+
+### ✅ A2: 보통 이 오류는 두 가지 중 하나 때문에 발생해요.
+
+1. **레포지토리 이름이 잘못되었거나 존재하지 않음**
+2. **SSH 인증에 실패했을 경우**
+
+→ 이번에는 SSH 인증은 성공했고, **URL 오타**가 원인이었어요.
+
+---
+
+## ✅ Q3: 해결 절차는 어떻게 되나요?
+
+1. 기존 리모트 삭제:
+```bash
+git remote remove origin
+````
+
+2. 정확한 주소로 다시 등록:
+
+```bash
+git remote add origin git@github.com:Xellos216/SQL_Study.git
+```
+
+3. 푸시:
+
+```bash
+git push -u origin main
+```
+
+---
+
+## ✅ Q4: SSH 인증은 어떻게 확인하나요?
+
+```bash
+ssh -T git@github.com
+```
+
+출력 예시:
+
+```
+Hi Xellos216! You've successfully authenticated...
+```
+
+---
+
+## ❓ Q5: 로컬에서 `Bootcamp_Prestudy_2.md` 파일 이름을 바꿨는데,
+
+푸시한 뒤에도 **원격에 예전 파일(`Bootcamp_Prestudy_2.md`)이 남아있는 이유는 뭔가요?**
+
+### ✅ A5: Git은 **파일 이름 변경을 추적하려면** `git mv`나 `git rm + git add`를 통해
+
+**명시적으로 변경 사실을 알려줘야** 합니다.
+
+* 단순히 파일명을 OS에서 바꾸기만 하면 Git은 다음처럼 해석합니다:
+
+  * "새 파일이 생겼군." (`Bootcamp_Prestudy.md`)
+  * "하지만 이전 파일은 삭제됐다는 신호를 못 받았네?" → 그대로 남겨둠
+
+---
+
+## ✅ Q6: 이름 변경이 제대로 반영되도록 하려면?
+
+### 방법 1: 이름 바꾸기 전에 Git에게 직접 알려주기 (권장)
+
+```bash
+git mv Bootcamp_Prestudy_2.md Bootcamp_Prestudy.md
+git commit -m "Rename file"
+git push
+```
+
+### 방법 2: 이미 이름을 바꿨다면
+
+```bash
+git add Bootcamp_Prestudy.md
+git rm Bootcamp_Prestudy_2.md
+git commit -m "Rename file manually"
+git push
+```
+
+---
+
+## 🧠 요약
+
+| 항목               | 설명                                            |
+| ---------------- | --------------------------------------------- |
+| SSH 인증 오류        | 실제로는 URL 오타가 원인이었음                            |
+| Git에서 이름 바꾸기     | `git mv` 또는 `git rm + git add`로 명시해야 원격에도 반영됨 |
+| 그냥 OS에서 이름만 바꾸면? | Git은 삭제된 걸 인식하지 못해, 원격에 그대로 남음                |
+
+```
+
+---
+
+
