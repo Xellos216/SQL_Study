@@ -112,10 +112,3 @@ WHERE ...
 GROUP BY ...
 ORDER BY ...;
 ```
-
-**구조 순서 매칭 퀴즈 예시**
-1. SELECT  
-2. FROM  
-3. WHERE  
-4. GROUP BY  
-5. ORDER BY
